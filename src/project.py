@@ -36,6 +36,26 @@ def draw_maze(screen, maze):
             elif maze [y][x] == 2:
                 pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))    
 
+# Player class
+class Player:
+    
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+    
+    def move(self, dx, dy, maze):
+        new_x = self.x + dx
+        new_y = self.y + dy
+        if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT and maze[new_y][new_x] != 1:
+            self.x = new_x
+            self.y = new_y
+    
+    def draw(self, screen):
+        pygame.draw.rect(screen, GREEN, (self.x * CELL_SIZE, self.y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
+# Timer Class
+
+
 
 def main():
     ...
