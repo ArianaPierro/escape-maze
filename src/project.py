@@ -32,9 +32,11 @@ def draw_maze(screen, maze):
     for y in range(MAZE_HEIGHT):
         for x in range(MAZE_WIDTH):
             if maze [y][x] == 1:
-                pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE,
+                                                 CELL_SIZE, CELL_SIZE))
             elif maze [y][x] == 2:
-                pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))    
+                pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE,
+                                               CELL_SIZE, CELL_SIZE))    
 
 # Player class
 class Player:
@@ -51,7 +53,8 @@ class Player:
             self.y = new_y
     
     def draw(self, screen):
-        pygame.draw.rect(screen, GREEN, (self.x * CELL_SIZE, self.y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        pygame.draw.rect(screen, GREEN, (self.x * CELL_SIZE, self.y * CELL_SIZE,
+                                         CELL_SIZE, CELL_SIZE))
 
 # Timer Class
 class Timer:
@@ -81,8 +84,50 @@ class Timer:
 
 
 def main():
-    ...
-
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    font = pygame.font.SysFont(None, 36)
+    pygame.display.set_caption("Escape the Maze")
+    clock = pygame.time.Clock()
+    maze = create_maze()
+    player = Player()
+    countdown_time = 120 # Countdown time in seconds (2 minutes)
+    timer = Timer(countdown_time)
+    running = True
+    won = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    player.move(0, -1, maze)
+                elif event.key == pygame.K_DOWN:
+                    player.move(0, 1, maze)
+                elif event.key == pygame.K_LEFT:
+                    player.move(-1, 0, maze)
+                elif event.key == pygame.K_RIGHT:
+                    player.move(1, 0, maze)
+        screen.fill(WHITE)
+        draw_maze(screen, maze)
+        player.draw(screen)
+        timer.draw(screen)
+        if maze[player.y][player.x] == 2:
+            won = True
+            running = False
+        if timer.is_time_up():
+            running = False
+        pygame.display.flip()
+        clock.tick(30)
+    screen.fill(WHITE)
+    if won:
+        time_text = font.render('You won!', True, BLACK)
+    else:
+        time_text = font.render('You lose!', True, BLACK)
+    screen.blit(time_text, (SCREEN_WIDTH // 2 - time_text.get_width() // 2,
+                            SCREEN_HEIGHT // 2 - time_text.get_height() // 2))
+    pygame.display.flip()
+    pygame.time.wait(3000)
+    pygame.quit()
 
 
 if __name__ == "__main__":
