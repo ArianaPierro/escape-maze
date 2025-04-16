@@ -89,6 +89,7 @@ def main():
     pygame.display.set_caption("Escape the Maze")
     clock = pygame.time.Clock()
     maze = create_maze()
+    flooring = pygame.image.load("wood_floor.jpg").convert()
     player = Player()
     countdown_time = 120 # Countdown time in seconds (2 minutes)
     timer = Timer(countdown_time)
@@ -98,18 +99,22 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP]:
                     player.move(0, -1, maze)
-                elif event.key == pygame.K_DOWN:
+            elif keys[pygame.K_DOWN]:
                     player.move(0, 1, maze)
-                elif event.key == pygame.K_LEFT:
+            elif keys[pygame.K_LEFT]:
                     player.move(-1, 0, maze)
-                elif event.key == pygame.K_RIGHT:
+            elif keys[pygame.K_RIGHT]:
                     player.move(1, 0, maze)
         screen.fill(WHITE)
+        for x in range(0, SCREEN_WIDTH, flooring.get_width()):
+            for y in range(0, SCREEN_HEIGHT, flooring.get_height()):
+                screen.blit(flooring, (x, y))
         draw_maze(screen, maze)
         player.draw(screen)
+        pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
         timer.draw(screen)
         if maze[player.y][player.x] == 2:
             won = True
