@@ -15,21 +15,21 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 GRAY = (192, 192, 192)
 
+# Create Maze
+def create_maze():
+    maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
+    # Randomly add obstacles
+    for _ in range(200):
+        x= random.randint(0, MAZE_WIDTH - 1)
+        y= random.randint(0, MAZE_HEIGHT - 1)
+        maze[y][x] = 1
+    # Set endpoint
+    maze[MAZE_HEIGHT - 1][MAZE_WIDTH - 1] = 2
+    return maze
 
 def main():
     ...
 
-
-class SomeClass():
-
-    def method_1():
-        ...
-
-    def method_2():
-        ...
-
-    def method_n():
-        ...
 
 
 if __name__ == "__main__":
