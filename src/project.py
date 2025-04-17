@@ -39,25 +39,28 @@ def draw_maze(screen, maze):
                                                CELL_SIZE, CELL_SIZE))    
 
 # Player class
-class Player:
+class Player():
     
     def __init__(self):
         self.x = 0
         self.y = 0
-    
+        self.image = pygame.image.load("boy.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, 
+                                            (self.image.get_width() // 22, 
+                                            self.image.get_height() // 22))
+        
     def move(self, dx, dy, maze):
-        new_x = self.x + dx
-        new_y = self.y + dy
+        new_x = self.x + dx 
+        new_y = self.y + dy 
         if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT and maze[new_y][new_x] != 1:
             self.x = new_x
             self.y = new_y
     
     def draw(self, screen):
-        pygame.draw.rect(screen, GREEN, (self.x * CELL_SIZE, self.y * CELL_SIZE,
-                                         CELL_SIZE, CELL_SIZE))
+        screen.blit(self.image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
 
 # Timer Class
-class Timer:
+class Timer():
 
     def __init__(self, countdown_time):
         self.font = pygame.font.SysFont(None, 36)
