@@ -6,17 +6,18 @@ pygame.init()
 # Constants
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 650 # Increased height for timer display
-CELL_SIZE = 20
+CELL_SIZE = 25
 MAZE_WIDTH = SCREEN_WIDTH // CELL_SIZE
 MAZE_HEIGHT = (SCREEN_HEIGHT - 50) // CELL_SIZE # Adjusted height for timer display
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 GRAY = (192, 192, 192)
 
 # Create Maze
 def create_maze():
+    # use a maze generation algorithms and comment this off for later so that
+    # can use for personal obstacles that I'll implement later that will be retractable
     maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
     # Randomly add obstacles
     for _ in range(200):
@@ -46,8 +47,8 @@ class Player():
         self.y = 0
         self.image = pygame.image.load("boy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, 
-                                            (self.image.get_width() // 22, 
-                                            self.image.get_height() // 22))
+                                            (self.image.get_width() // 18, 
+                                            self.image.get_height() // 18))
         
     def move(self, dx, dy, maze):
         new_x = self.x + dx 
@@ -92,7 +93,11 @@ def main():
     pygame.display.set_caption("Escape the Maze")
     clock = pygame.time.Clock()
     maze = create_maze()
-    flooring = pygame.image.load("wood_floor.jpg").convert()
+    image = pygame.image.load("wood_floor.jpg").convert()
+    game_over = pygame.image.load("GameOver.png").convert()
+    flooring = pygame.transform.scale(image, 
+                                            (image.get_width() // 10, 
+                                             image.get_height() // 10))
     player = Player()
     countdown_time = 120 # Countdown time in seconds (2 minutes)
     timer = Timer(countdown_time)
@@ -128,11 +133,11 @@ def main():
         clock.tick(30)
     screen.fill(WHITE)
     if won:
-        time_text = font.render('You won!', True, BLACK)
+        time_text = font.render('YOU ESCAPED!', True, BLACK)
     else:
-        time_text = font.render('You lose!', True, BLACK)
-    screen.blit(time_text, (SCREEN_WIDTH // 2 - time_text.get_width() // 2,
-                            SCREEN_HEIGHT // 2 - time_text.get_height() // 2))
+        screen.blit(game_over, (0, 0))
+    # screen.blit(time_text, (SCREEN_WIDTH // 2 - time_text.get_width() // 2,
+    #                         SCREEN_HEIGHT // 2 - time_text.get_height() // 2))
     pygame.display.flip()
     pygame.time.wait(3000)
     pygame.quit()
