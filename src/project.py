@@ -95,6 +95,7 @@ def main():
     maze = create_maze()
     image = pygame.image.load("wood_floor.jpg").convert()
     game_over = pygame.image.load("GameOver.png").convert()
+    winner = pygame.image.load("Escaped.png").convert()
     flooring = pygame.transform.scale(image, 
                                             (image.get_width() // 10, 
                                              image.get_height() // 10))
@@ -133,11 +134,9 @@ def main():
         clock.tick(30)
     screen.fill(WHITE)
     if won:
-        time_text = font.render('YOU ESCAPED!', True, BLACK)
+        screen.blit(winner, (0, 0))
     else:
         screen.blit(game_over, (0, 0))
-    # screen.blit(time_text, (SCREEN_WIDTH // 2 - time_text.get_width() // 2,
-    #                         SCREEN_HEIGHT // 2 - time_text.get_height() // 2))
     pygame.display.flip()
     pygame.time.wait(3000)
     pygame.quit()
