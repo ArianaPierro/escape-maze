@@ -9,35 +9,111 @@ SCREEN_HEIGHT = 650 # Increased height for timer display
 CELL_SIZE = 25
 MAZE_WIDTH = SCREEN_WIDTH // CELL_SIZE
 MAZE_HEIGHT = (SCREEN_HEIGHT - 50) // CELL_SIZE # Adjusted height for timer display
+ENDPOINT = 2
+NORTH, SOUTH, EAST, WEST = 'n', 's', 'e', 'w'
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-GRAY = (192, 192, 192)
+WALL = BLACK
+PATH = 0
+EMPTY = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
+EMPTY.fill((255, 0, 255, 0))
 
-# Create Maze
-def create_maze():
-    # use a maze generation algorithms and comment this off for later so that
-    # can use for personal obstacles that I'll implement later that will be retractable
-    maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
-    # Randomly add obstacles
-    for _ in range(200):
-        x = random.randint(0, MAZE_WIDTH - 1)
-        y = random.randint(0, MAZE_HEIGHT - 1)
-        maze[y][x] = 1
-    # Set endpoint
-    maze[MAZE_HEIGHT - 1][MAZE_WIDTH - 1] = 2
-    return maze
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+maze = {}
+for x in range(MAZE_WIDTH):
+    for y in range(MAZE_HEIGHT):
+        maze[(x, y)] = 1 # Every space is a wall at first.
 
-# Draw Maze
-def draw_maze(screen, maze):
+
+def draw_maze(maze):
     for y in range(MAZE_HEIGHT):
         for x in range(MAZE_WIDTH):
-            if maze [y][x] == 1:
+            if maze[(x, y)] == 1:
                 pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE,
-                                                 CELL_SIZE, CELL_SIZE))
-            elif maze [y][x] == 2:
+                                         CELL_SIZE, CELL_SIZE))
+            if maze[(x, y)] == PATH:
+                screen.blit(EMPTY, (x * CELL_SIZE, y * CELL_SIZE))
+            if maze[(x, y)] == ENDPOINT:
                 pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE,
-                                               CELL_SIZE, CELL_SIZE))    
+                                               CELL_SIZE, CELL_SIZE)) 
+            
+
+def visit(x, y):
+    stack = [(x, y)]
+    while len(stack) > 0:
+        x, y = stack[-1]
+    maze[(x, y)] = PATH # "Carve out" the space at x, y.
+    while True:
+        # Check which neighboring spaces adjacent to
+        # the mark have not been visited already:
+        unvisitedNeighbors = []
+        if y > 1 and (x, y - 2) not in hasVisited:
+            unvisitedNeighbors.append(NORTH)
+        if y < MAZE_HEIGHT - 2 and (x, y + 2) not in hasVisited:
+            unvisitedNeighbors.append(SOUTH)
+        if x > 1 and (x - 2, y) not in hasVisited:
+            unvisitedNeighbors.append(WEST)
+        if x < MAZE_WIDTH - 2 and (x + 2, y) not in hasVisited:
+            unvisitedNeighbors.append(EAST)
+        if len(unvisitedNeighbors) == 0:
+            # BASE CASE
+            # All neighboring spaces have been visited, so this is a
+            # dead end. Backtrack to an earlier space:
+            return
+        else:
+            # RECURSIVE CASE
+            # Randomly pick an unvisited neighbor to visit:
+            nextIntersection = random.choice(unvisitedNeighbors)
+            # Move the mark to an unvisited neighboring space:
+            if nextIntersection == NORTH:
+                nextX = x
+                nextY = y - 2
+                maze[(x, y - 1)] = PATH # Connecting hallway.
+            elif nextIntersection == SOUTH:
+                nextX = x
+                nextY = y + 2
+                maze[(x, y + 1)] = PATH # Connecting hallway.
+            elif nextIntersection == WEST:
+                nextX = x - 2
+                nextY = y
+                maze[(x - 1, y)] = PATH # Connecting hallway.
+            elif nextIntersection == EAST:
+                nextX = x + 2
+                nextY = y
+                maze[(x + 1, y)] = PATH # Connecting hallway.
+            hasVisited.append((nextX, nextY)) # Mark as visited.
+            visit(nextX, nextY) # Recursively visit this space.
+
+# Carve out the paths in the maze data structure:
+hasVisited = [(1, 1)] # Start by visiting the top-left corner.
+visit(1, 1)
+empty_cells = [cell for cell in maze if maze[cell] == PATH]
+endpoint = random.choice(empty_cells)    
+maze[endpoint] = ENDPOINT    
+
+# def create_maze():
+#     # can use for personal obstacles that I'll implement later that will be retractable
+#     maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
+#     # Randomly add obstacles
+#     for _ in range(200):
+#         x = random.randint(0, MAZE_WIDTH - 1)
+#         y = random.randint(0, MAZE_HEIGHT - 1)
+#         maze[y][x] = 1
+#     # Set endpoint
+#     maze[MAZE_HEIGHT - 1][MAZE_WIDTH - 1] = 2
+#     return maze
+
+# # Draw Maze
+# def draw_maze(screen, maze):
+#     for y in range(MAZE_HEIGHT):
+#         for x in range(MAZE_WIDTH):
+#             if maze [y][x] == 1:
+#                 pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE,
+#                                                  CELL_SIZE, CELL_SIZE))
+#             elif maze [y][x] == 2:
+#                 pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE,
+#                                                CELL_SIZE, CELL_SIZE))    
 
 # Player class
 class Player():
@@ -53,7 +129,7 @@ class Player():
     def move(self, dx, dy, maze):
         new_x = self.x + dx 
         new_y = self.y + dy 
-        if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT and maze[new_y][new_x] != 1:
+        if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT and maze[(new_y, new_x)] != 1:
             self.x = new_x
             self.y = new_y
     
@@ -88,11 +164,8 @@ class Timer():
 
 
 def main():
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    font = pygame.font.SysFont(None, 36)
     pygame.display.set_caption("Escape the Maze")
     clock = pygame.time.Clock()
-    maze = create_maze()
     image = pygame.image.load("wood_floor.jpg").convert()
     game_over = pygame.image.load("GameOver.png").convert()
     winner = pygame.image.load("Escaped.png").convert()
@@ -117,28 +190,27 @@ def main():
                     player.move(-1, 0, maze)
             elif keys[pygame.K_RIGHT]:
                     player.move(1, 0, maze)
-        screen.fill(WHITE)
         for x in range(0, SCREEN_WIDTH, flooring.get_width()):
             for y in range(0, SCREEN_HEIGHT, flooring.get_height()):
                 screen.blit(flooring, (x, y))
-        draw_maze(screen, maze)
+        draw_maze(maze)
+        # draw_maze(screen, maze)
         player.draw(screen)
         pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
         timer.draw(screen)
-        if maze[player.y][player.x] == 2:
+        if maze[(player.x, player.y)] == ENDPOINT:
             won = True
             running = False
         if timer.is_time_up():
             running = False
         pygame.display.flip()
         clock.tick(30)
-    screen.fill(WHITE)
     if won:
         screen.blit(winner, (0, 0))
     else:
         screen.blit(game_over, (0, 0))
     pygame.display.flip()
-    pygame.time.wait(3000)
+    pygame.time.wait(4000)
     pygame.quit()
 
 
