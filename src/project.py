@@ -6,7 +6,7 @@ pygame.init()
 # Constants
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 650 # Increased height for timer display
-CELL_SIZE = 25
+CELL_SIZE = 24
 MAZE_WIDTH = SCREEN_WIDTH // CELL_SIZE
 MAZE_HEIGHT = (SCREEN_HEIGHT - 50) // CELL_SIZE # Adjusted height for timer display
 ENDPOINT = 2
@@ -41,12 +41,9 @@ def draw_maze(maze):
 
 def visit(x, y):
     stack = [(x, y)]
+    maze[(x, y)] = PATH
     while len(stack) > 0:
-        x, y = stack[-1]
-    maze[(x, y)] = PATH # "Carve out" the space at x, y.
-    while True:
-        # Check which neighboring spaces adjacent to
-        # the mark have not been visited already:
+        x, y = stack[-1] 
         unvisitedNeighbors = []
         if y > 1 and (x, y - 2) not in hasVisited:
             unvisitedNeighbors.append(NORTH)
@@ -57,40 +54,35 @@ def visit(x, y):
         if x < MAZE_WIDTH - 2 and (x + 2, y) not in hasVisited:
             unvisitedNeighbors.append(EAST)
         if len(unvisitedNeighbors) == 0:
-            # BASE CASE
-            # All neighboring spaces have been visited, so this is a
-            # dead end. Backtrack to an earlier space:
+            stack.pop()
             return
         else:
-            # RECURSIVE CASE
-            # Randomly pick an unvisited neighbor to visit:
             nextIntersection = random.choice(unvisitedNeighbors)
-            # Move the mark to an unvisited neighboring space:
             if nextIntersection == NORTH:
                 nextX = x
                 nextY = y - 2
-                maze[(x, y - 1)] = PATH # Connecting hallway.
+                maze[(x, y - 1)] = PATH 
             elif nextIntersection == SOUTH:
                 nextX = x
                 nextY = y + 2
-                maze[(x, y + 1)] = PATH # Connecting hallway.
+                maze[(x, y + 1)] = PATH 
             elif nextIntersection == WEST:
                 nextX = x - 2
                 nextY = y
-                maze[(x - 1, y)] = PATH # Connecting hallway.
+                maze[(x - 1, y)] = PATH 
             elif nextIntersection == EAST:
                 nextX = x + 2
                 nextY = y
-                maze[(x + 1, y)] = PATH # Connecting hallway.
-            hasVisited.append((nextX, nextY)) # Mark as visited.
+                maze[(x + 1, y)] = PATH 
+            hasVisited.append((nextX, nextY))
+            stack.append((nextX, nextY))
             visit(nextX, nextY) # Recursively visit this space.
-
-# Carve out the paths in the maze data structure:
-hasVisited = [(1, 1)] # Start by visiting the top-left corner.
+hasVisited = [(0, 0)] # Start by visiting the top-left corner.
 visit(1, 1)
 empty_cells = [cell for cell in maze if maze[cell] == PATH]
 endpoint = random.choice(empty_cells)    
-maze[endpoint] = ENDPOINT    
+maze[endpoint] = ENDPOINT 
+
 
 # def create_maze():
 #     # can use for personal obstacles that I'll implement later that will be retractable
@@ -119,8 +111,8 @@ maze[endpoint] = ENDPOINT
 class Player():
     
     def __init__(self):
-        self.x = 0
-        self.y = 0
+        self.x = 1
+        self.y = 1
         self.image = pygame.image.load("boy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, 
                                             (self.image.get_width() // 18, 
@@ -129,7 +121,7 @@ class Player():
     def move(self, dx, dy, maze):
         new_x = self.x + dx 
         new_y = self.y + dy 
-        if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT and maze[(new_y, new_x)] != 1:
+        if 0 <= new_x < MAZE_WIDTH and 0 <= new_y < MAZE_HEIGHT and maze[(new_x, new_y)] != 1:
             self.x = new_x
             self.y = new_y
     
