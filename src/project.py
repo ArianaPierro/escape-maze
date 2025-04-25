@@ -13,13 +13,16 @@ ENDPOINT = 2
 NORTH, SOUTH, EAST, WEST = 'n', 's', 'e', 'w'
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-WALL = BLACK
+WALL = (65, 77, 58)
 PATH = 0
 EMPTY = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
 EMPTY.fill((255, 0, 255, 0))
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+img = pygame.image.load("exit_door.png").convert_alpha()
+exit_door = pygame.transform.scale(img, 
+                                  (img.get_width() // 15, 
+                                   img.get_height() // 20))
 maze = {}
 for x in range(MAZE_WIDTH):
     for y in range(MAZE_HEIGHT):
@@ -30,13 +33,12 @@ def draw_maze(maze):
     for y in range(MAZE_HEIGHT):
         for x in range(MAZE_WIDTH):
             if maze[(x, y)] == 1:
-                pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE,
+                pygame.draw.rect(screen, WALL, (x * CELL_SIZE, y * CELL_SIZE,
                                          CELL_SIZE, CELL_SIZE))
             if maze[(x, y)] == PATH:
                 screen.blit(EMPTY, (x * CELL_SIZE, y * CELL_SIZE))
             if maze[(x, y)] == ENDPOINT:
-                pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE,
-                                               CELL_SIZE, CELL_SIZE)) 
+                screen.blit(exit_door, (x * CELL_SIZE, y * CELL_SIZE)) 
             
 
 def visit(x, y):
@@ -96,7 +98,7 @@ maze[endpoint] = ENDPOINT
 #     maze[MAZE_HEIGHT - 1][MAZE_WIDTH - 1] = 2
 #     return maze
 
-# # Draw Maze
+
 # def draw_maze(screen, maze):
 #     for y in range(MAZE_HEIGHT):
 #         for x in range(MAZE_WIDTH):
@@ -116,7 +118,7 @@ class Player():
         self.image = pygame.image.load("boy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, 
                                             (self.image.get_width() // 18, 
-                                            self.image.get_height() // 18))
+                                             self.image.get_height() // 18))
         
     def move(self, dx, dy, maze):
         new_x = self.x + dx 
@@ -162,8 +164,8 @@ def main():
     game_over = pygame.image.load("GameOver.png").convert()
     winner = pygame.image.load("Escaped.png").convert()
     flooring = pygame.transform.scale(image, 
-                                            (image.get_width() // 10, 
-                                             image.get_height() // 10))
+                                     (image.get_width() // 10, 
+                                      image.get_height() // 10))
     player = Player()
     countdown_time = 120 # Countdown time in seconds (2 minutes)
     timer = Timer(countdown_time)
@@ -186,7 +188,6 @@ def main():
             for y in range(0, SCREEN_HEIGHT, flooring.get_height()):
                 screen.blit(flooring, (x, y))
         draw_maze(maze)
-        # draw_maze(screen, maze)
         player.draw(screen)
         pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
         timer.draw(screen)
