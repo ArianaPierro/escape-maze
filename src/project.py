@@ -13,13 +13,14 @@ ENDPOINT = 2
 NORTH, SOUTH, EAST, WEST = 'n', 's', 'e', 'w'
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+PURPLE = (118, 90, 143)
 WALL = (65, 77, 58)
 PATH = 0
 EMPTY = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
 EMPTY.fill((255, 0, 255, 0))
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-img = pygame.image.load("exit_door.png").convert_alpha()
+img = pygame.image.load("game_images/exit_door.png").convert_alpha()
 exit_door = pygame.transform.scale(img, 
                                   (img.get_width() // 15, 
                                    img.get_height() // 20))
@@ -86,6 +87,24 @@ endpoint = random.choice(empty_cells)
 maze[endpoint] = ENDPOINT 
 
 
+def button(x, y, text):
+    button_base = pygame.Surface((50, 30))
+    button_base.fill(PURPLE)
+    title = pygame.font.SysFont(None, 20).render(text, True, WHITE)
+    button_base.blit(title, (25, 15))
+    pygame.Surface.blit(button_base, screen)
+    btn = pygame.Rect((x, y), (50, 30))
+    action = False
+    mouse_pos = pygame.mouse.get_pos()
+    if btn.collidepoint(mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1 and clicked == False:
+            clicked = True
+            action = True
+        if pygame.mouse.get_pressed()[0] == 0:
+            clicked = False
+        return action
+    return
+    
 # def create_maze():
 #     # can use for personal obstacles that I'll implement later that will be retractable
 #     maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
@@ -115,7 +134,7 @@ class Player():
     def __init__(self):
         self.x = 1
         self.y = 1
-        self.image = pygame.image.load("boy.png").convert_alpha()
+        self.image = pygame.image.load("game_images/boy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, 
                                             (self.image.get_width() // 18, 
                                              self.image.get_height() // 18))
@@ -160,9 +179,9 @@ class Timer():
 def main():
     pygame.display.set_caption("Escape the Maze")
     clock = pygame.time.Clock()
-    image = pygame.image.load("wood_floor.jpg").convert()
-    game_over = pygame.image.load("GameOver.png").convert()
-    winner = pygame.image.load("Escaped.png").convert()
+    image = pygame.image.load("game_images/wood_floor.jpg").convert()
+    game_over = pygame.image.load("game_images/GameOver.png").convert()
+    winner = pygame.image.load("game_images/Escaped.png").convert()
     flooring = pygame.transform.scale(image, 
                                      (image.get_width() // 10, 
                                       image.get_height() // 10))
@@ -200,8 +219,14 @@ def main():
         clock.tick(30)
     if won:
         screen.blit(winner, (0, 0))
+        # add Again? and quit button
+        if button(400, 500, "Quit"):
+            pygame.quit()
     else:
         screen.blit(game_over, (0, 0))
+        # add retry and quit button
+        if button(400, 500, "Quit"):
+            pygame.quit()
     pygame.display.flip()
     pygame.time.wait(4000)
     pygame.quit()
