@@ -24,6 +24,7 @@ img = pygame.image.load("game_images/exit_door.png").convert_alpha()
 exit_door = pygame.transform.scale(img, 
                                   (img.get_width() // 15, 
                                    img.get_height() // 20))
+clicked = False
 maze = {}
 for x in range(MAZE_WIDTH):
     for y in range(MAZE_HEIGHT):
@@ -88,45 +89,51 @@ maze[endpoint] = ENDPOINT
 
 
 def button(x, y, text):
-    button_base = pygame.Surface((50, 30))
+    global clicked
+    btn_width = 150
+    btn_height = 60
+    button_base = pygame.Surface((btn_width, btn_height))
     button_base.fill(PURPLE)
-    title = pygame.font.SysFont(None, 20).render(text, True, WHITE)
-    button_base.blit(title, (25, 15))
-    pygame.Surface.blit(button_base, screen)
-    btn = pygame.Rect((x, y), (50, 30))
+    title = pygame.font.SysFont(None, 45).render(text, True, WHITE)
+    button_base.blit(title, (btn_width//4, btn_height//4))
+    screen.blit(button_base, (x, y))
+    btn = pygame.Rect((x, y), (btn_width, btn_height))
     action = False
     mouse_pos = pygame.mouse.get_pos()
     if btn.collidepoint(mouse_pos):
+        pygame.mouse.set_cursor()
         if pygame.mouse.get_pressed()[0] == 1 and clicked == False:
             clicked = True
             action = True
         if pygame.mouse.get_pressed()[0] == 0:
             clicked = False
-        return action
-    return
+    return action
+
     
 # def create_maze():
-#     # can use for personal obstacles that I'll implement later that will be retractable
-#     maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
-#     # Randomly add obstacles
-#     for _ in range(200):
-#         x = random.randint(0, MAZE_WIDTH - 1)
-#         y = random.randint(0, MAZE_HEIGHT - 1)
-#         maze[y][x] = 1
-#     # Set endpoint
-#     maze[MAZE_HEIGHT - 1][MAZE_WIDTH - 1] = 2
-#     return maze
+    # can use for personal obstacles that I'll implement later that will be retractable
+    maze = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
+    # Randomly add obstacles
+    for _ in range(200):
+        x = random.randint(0, MAZE_WIDTH - 1)
+        y = random.randint(0, MAZE_HEIGHT - 1)
+        maze[y][x] = 1
+    # Set endpoint
+    maze[MAZE_HEIGHT - 1][MAZE_WIDTH - 1] = 2
+    pass
+    return maze
+    
 
-
-# def draw_maze(screen, maze):
-#     for y in range(MAZE_HEIGHT):
-#         for x in range(MAZE_WIDTH):
-#             if maze [y][x] == 1:
-#                 pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE,
-#                                                  CELL_SIZE, CELL_SIZE))
-#             elif maze [y][x] == 2:
-#                 pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE,
-#                                                CELL_SIZE, CELL_SIZE))    
+# def draw_obstacles(screen, maze):
+    for y in range(MAZE_HEIGHT):
+        for x in range(MAZE_WIDTH):
+            if maze [y][x] == 1:
+                pygame.draw.rect(screen, BLACK, (x * CELL_SIZE, y * CELL_SIZE,
+                                                 CELL_SIZE, CELL_SIZE))
+            elif maze [y][x] == 2:
+                pygame.draw.rect(screen, RED, (x * CELL_SIZE, y * CELL_SIZE,
+                                               CELL_SIZE, CELL_SIZE))  
+    pass  
 
 # Player class
 class Player():
@@ -190,6 +197,7 @@ def main():
     timer = Timer(countdown_time)
     running = True
     won = False
+    game_end = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -217,19 +225,26 @@ def main():
             running = False
         pygame.display.flip()
         clock.tick(30)
-    if won:
-        screen.blit(winner, (0, 0))
-        # add Again? and quit button
-        if button(400, 500, "Quit"):
-            pygame.quit()
-    else:
-        screen.blit(game_over, (0, 0))
-        # add retry and quit button
-        if button(400, 500, "Quit"):
-            pygame.quit()
-    pygame.display.flip()
-    pygame.time.wait(4000)
-    pygame.quit()
+    
+    while game_end == True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_end = False           
+        if won:
+            screen.blit(winner, (0, 0))
+            # add Again? button
+        else:
+            screen.blit(game_over, (0, 0))
+            # add retry button
+        if button(350, 570, "Quit!"):
+                game_end = False
+                pygame.quit()
+        if button(100, 570, "Again"):
+                pass   
+        pygame.display.flip()
+
+    # pygame.time.wait(4000)
+    # pygame.quit()
 
 
 if __name__ == "__main__":
