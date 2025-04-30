@@ -137,6 +137,7 @@ def button(x, y, text):
                                                CELL_SIZE, CELL_SIZE))  
     pass  
 
+
 # Player class
 class Player():
     
@@ -186,48 +187,42 @@ class Timer():
 
 player = Player()
 timer = Timer(countdown_time=120)
+running = True
+won = False
+clock = pygame.time.Clock()
+game_end = False
 
-def reset_game():
-    pygame.init()
-    pygame.font.init()
-    global maze
+def initialize_game():
     global player
     global timer
-    global hasVisited
-    global maze
-    global endpoint
-    global empty_cells
+    global clock
+    global running
+    global won
     maze = {}
     for x in range(MAZE_WIDTH):
         for y in range(MAZE_HEIGHT):
-            maze[(x, y)] = 1
+            maze[(x, y)] = 1 
     player = Player()
     timer = Timer(countdown_time=120)
-    hasVisited = [(0, 0)]
-    visit(1, 1)
-    empty_cells = [cell for cell in maze if maze[cell] == PATH]
-    endpoint = random.choice(empty_cells)    
-    maze[endpoint] = ENDPOINT 
+    clock = pygame.time.Clock()
     draw_maze(maze)
     pygame.display.flip()
     return
 
 
-def main():
+def game_loop():
     global player
     global timer
+    global running
+    global won
     pygame.display.set_caption("Escape the Maze")
-    clock = pygame.time.Clock()
-    image = pygame.image.load("game_images/wood_floor.jpg").convert()
-    game_over = pygame.image.load("game_images/GameOver.png").convert()
-    winner = pygame.image.load("game_images/Escaped.png").convert()
-    flooring = pygame.transform.scale(image, 
-                                     (image.get_width() // 10, 
-                                      image.get_height() // 10))
-    running = True
-    won = False
-    game_end = True
+    img = pygame.image.load("game_images/wood_floor.jpg").convert()
+    flooring = pygame.transform.scale(img, 
+                                     (img.get_width() // 10, 
+                                      img.get_height() // 10))
+    initialize_game()
     while running:
+        player.draw(screen)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -254,24 +249,49 @@ def main():
             running = False
         pygame.display.flip()
         clock.tick(30)
-    
-    while game_end == True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_end = False           
-        if won:
-            screen.blit(winner, (0, 0))
-        else:
-            screen.blit(game_over, (0, 0))
-        if button(100, 570, "Again"):
-            reset_game()  
-        if button(350, 570, "Quit!"):
-            game_end = False   
-        pygame.display.flip()
+    return
 
-    # pygame.time.wait(4000)
-    pygame.quit()
 
+def reset_game():
+    global running
+    global won
+    global game_end
+    running = True
+    won = False
+    game_end = False
+    game_loop()
+    return
+
+
+def main():
+    global player
+    global timer
+    global running
+    global won
+    global game_end
+    game_over = pygame.image.load("game_images/GameOver.png").convert()
+    winner = pygame.image.load("game_images/Escaped.png").convert()
+    game_loop()
+    while True:    
+        while game_end == False:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_end = True     
+            if won and game_end == False:
+                screen.blit(winner, (0, 0))
+            elif not won and game_end == False:
+                screen.blit(game_over, (0, 0))
+            if button(100, 570, "Again") and game_end == False:
+                game_end = True
+                screen.fill(WHITE)
+                reset_game()
+            if button(350, 570, "Quit!") and game_end == False:
+                game_end = True
+                pygame.quit()
+                break
+            pygame.display.update()
+        break
+        
 
 if __name__ == "__main__":
     main()
