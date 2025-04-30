@@ -3,6 +3,8 @@ import pygame
 
 
 pygame.init()
+pygame.font.init()
+
 # Constants
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 650 # Increased height for timer display
@@ -182,8 +184,38 @@ class Timer():
         remaining_time = self.countdown_time - elasped_time // 1000
         return remaining_time <= 0 
 
+player = Player()
+timer = Timer(countdown_time=120)
+
+def reset_game():
+    pygame.init()
+    pygame.font.init()
+    global maze
+    global player
+    global timer
+    global hasVisited
+    global maze
+    global endpoint
+    global empty_cells
+    maze = {}
+    for x in range(MAZE_WIDTH):
+        for y in range(MAZE_HEIGHT):
+            maze[(x, y)] = 1
+    player = Player()
+    timer = Timer(countdown_time=120)
+    hasVisited = [(0, 0)]
+    visit(1, 1)
+    empty_cells = [cell for cell in maze if maze[cell] == PATH]
+    endpoint = random.choice(empty_cells)    
+    maze[endpoint] = ENDPOINT 
+    draw_maze(maze)
+    pygame.display.flip()
+    return
+
 
 def main():
+    global player
+    global timer
     pygame.display.set_caption("Escape the Maze")
     clock = pygame.time.Clock()
     image = pygame.image.load("game_images/wood_floor.jpg").convert()
@@ -192,9 +224,6 @@ def main():
     flooring = pygame.transform.scale(image, 
                                      (image.get_width() // 10, 
                                       image.get_height() // 10))
-    player = Player()
-    countdown_time = 120 # Countdown time in seconds (2 minutes)
-    timer = Timer(countdown_time)
     running = True
     won = False
     game_end = True
@@ -232,19 +261,16 @@ def main():
                 game_end = False           
         if won:
             screen.blit(winner, (0, 0))
-            # add Again? button
         else:
             screen.blit(game_over, (0, 0))
-            # add retry button
-        if button(350, 570, "Quit!"):
-                game_end = False
-                pygame.quit()
         if button(100, 570, "Again"):
-                pass   
+            reset_game()  
+        if button(350, 570, "Quit!"):
+            game_end = False   
         pygame.display.flip()
 
     # pygame.time.wait(4000)
-    # pygame.quit()
+    pygame.quit()
 
 
 if __name__ == "__main__":
