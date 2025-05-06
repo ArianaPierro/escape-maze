@@ -27,10 +27,12 @@ exit_door = pygame.transform.scale(img,
                                   (img.get_width() // 15, 
                                    img.get_height() // 20))
 clicked = False
+hasVisited = []
 maze = {}
 for x in range(MAZE_WIDTH):
     for y in range(MAZE_HEIGHT):
         maze[(x, y)] = 1 # Every space is a wall at first.
+
 
 
 def draw_maze(maze):
@@ -46,6 +48,8 @@ def draw_maze(maze):
             
 
 def visit(x, y):
+    global maze
+    global hasVisited
     stack = [(x, y)]
     maze[(x, y)] = PATH
     while len(stack) > 0:
@@ -83,11 +87,7 @@ def visit(x, y):
             hasVisited.append((nextX, nextY))
             stack.append((nextX, nextY))
             visit(nextX, nextY) # Recursively visit this space.
-hasVisited = [(0, 0)] # Start by visiting the top-left corner.
-visit(1, 1)
-empty_cells = [cell for cell in maze if maze[cell] == PATH]
-endpoint = random.choice(empty_cells)    
-maze[endpoint] = ENDPOINT 
+hasVisited = [(1, 1)] # Start by visiting the top-left corner.
 
 
 def button(x, y, text):
@@ -166,22 +166,29 @@ won = False
 clock = pygame.time.Clock()
 game_end = False
 
+
 def initialize_game():
     global player
     global timer
     global clock
     global running
     global won
+    global hasVisited
+    global maze
     maze = {}
     for x in range(MAZE_WIDTH):
         for y in range(MAZE_HEIGHT):
             maze[(x, y)] = 1 
+    hasVisited = [(1, 1)]
+    visit(1, 1)
+    empty_cells = [cell for cell in maze if maze[cell] == PATH]
+    endpoint = random.choice(empty_cells)    
+    maze[endpoint] = ENDPOINT 
     player = Player()
     timer = Timer(countdown_time=120)
     clock = pygame.time.Clock()
     draw_maze(maze)
     pygame.display.flip()
-    return
 
 
 def game_loop():
@@ -194,7 +201,6 @@ def game_loop():
     flooring = pygame.transform.scale(img, 
                                      (img.get_width() // 10, 
                                       img.get_height() // 10))
-    initialize_game()
     while running:
         player.draw(screen)
         for event in pygame.event.get():
@@ -223,7 +229,6 @@ def game_loop():
             running = False
         pygame.display.flip()
         clock.tick(30)
-    return
 
 
 def reset_game():
@@ -233,9 +238,9 @@ def reset_game():
     running = True
     won = False
     game_end = False
+    initialize_game()
     game_loop()
-    return
-
+  
 
 def main():
     global player
@@ -245,6 +250,7 @@ def main():
     global game_end
     game_over = pygame.image.load("game_images/GameOver.png").convert()
     winner = pygame.image.load("game_images/Escaped.png").convert()
+    initialize_game()
     game_loop()
     while True:    
         while game_end == False:
