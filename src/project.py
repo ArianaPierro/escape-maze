@@ -34,7 +34,6 @@ for x in range(MAZE_WIDTH):
         maze[(x, y)] = 1 # Every space is a wall at first.
 
 
-
 def draw_maze(maze):
     for y in range(MAZE_HEIGHT):
         for x in range(MAZE_WIDTH):
@@ -44,8 +43,8 @@ def draw_maze(maze):
             if maze[(x, y)] == PATH:
                 screen.blit(EMPTY, (x * CELL_SIZE, y * CELL_SIZE))
             if maze[(x, y)] == ENDPOINT:
-                screen.blit(exit_door, (x * CELL_SIZE, y * CELL_SIZE)) 
-            
+                screen.blit(exit_door, (x * CELL_SIZE, y * CELL_SIZE))    
+  
 
 def visit(x, y):
     global maze
@@ -68,6 +67,15 @@ def visit(x, y):
             return
         else:
             nextIntersection = random.choice(unvisitedNeighbors)
+            branch = random.randint(1, 10)
+            if branch <= 8:
+                nextIntersection = random.choice(unvisitedNeighbors)
+                hasVisited.append((x, y))
+                for key, value in maze.items():
+                    cell = random.choice(hasVisited)
+                    if cell == 1:
+                        maze[(x, y)] = 0
+                # print("branch created")
             if nextIntersection == NORTH:
                 nextX = x
                 nextY = y - 2
