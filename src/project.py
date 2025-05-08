@@ -75,7 +75,6 @@ def visit(x, y):
                     cell = random.choice(hasVisited)
                     if cell == 1:
                         maze[(x, y)] = 0
-                # print("branch created")
             if nextIntersection == NORTH:
                 nextX = x
                 nextY = y - 2
@@ -118,8 +117,37 @@ def button(x, y, text):
         if pygame.mouse.get_pressed()[0] == 0:
             clicked = False
     return action
-             
 
+
+# Have to make it so that obstacles are only in paths and have collision
+class Obstacles():
+
+    def __init__(self):
+        self.image = pygame.image.load("game_images/trap.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, 
+                                  (self.image.get_width() // 25, 
+                                   self.image.get_height() // 25))
+        self.obstacles = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
+    
+    def create_obstacles(self):
+        # obstacles = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
+        a = random.randint(0, MAZE_WIDTH - 1)
+        b = random.randint(0, MAZE_HEIGHT - 1)
+        while maze[(a, b)] != PATH:
+                for _ in range(7):
+                    a = random.randint(0, MAZE_WIDTH - 1)
+                    b = random.randint(0, MAZE_HEIGHT - 1)
+                    if maze[(a, b)] == PATH: 
+                        self.obstacles[b][a] = 1
+        return self.obstacles
+        
+    def draw_obstacles(self, screen):
+        for y in range(MAZE_HEIGHT):
+            for x in range(MAZE_WIDTH):
+                if self.obstacles [y][x] == 1:
+                    screen.blit(self.image, (x * CELL_SIZE, y * CELL_SIZE,
+                                    CELL_SIZE, CELL_SIZE))
+             
 # Player class
 class Player():
     
@@ -171,6 +199,7 @@ player = Player()
 timer = Timer(countdown_time=120)
 running = True
 won = False
+obstacles = Obstacles()
 clock = pygame.time.Clock()
 game_end = False
 
@@ -181,6 +210,7 @@ def initialize_game():
     global clock
     global running
     global won
+    global obstacles
     global hasVisited
     global maze
     maze = {}
@@ -193,9 +223,12 @@ def initialize_game():
     endpoint = random.choice(empty_cells)    
     maze[endpoint] = ENDPOINT 
     player = Player()
+    obstacles = Obstacles()
     timer = Timer(countdown_time=120)
     clock = pygame.time.Clock()
     draw_maze(maze)
+    obstacles.create_obstacles()
+    obstacles.draw_obstacles(screen)
     pygame.display.flip()
 
 
@@ -204,6 +237,7 @@ def game_loop():
     global timer
     global running
     global won
+    global obstacles
     pygame.display.set_caption("Escape the Maze")
     img = pygame.image.load("game_images/wood_floor.jpg").convert()
     flooring = pygame.transform.scale(img, 
@@ -227,13 +261,14 @@ def game_loop():
             for y in range(0, SCREEN_HEIGHT, flooring.get_height()):
                 screen.blit(flooring, (x, y))
         draw_maze(maze)
+        obstacles.draw_obstacles(screen)
         player.draw(screen)
         pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
         timer.draw(screen)
         if maze[(player.x, player.y)] == ENDPOINT:
             won = True
             running = False
-        if timer.is_time_up():
+        if timer.is_time_up() or obstacles.obstacles[player.y][player.x] == 1:
             running = False
         pygame.display.flip()
         clock.tick(30)
