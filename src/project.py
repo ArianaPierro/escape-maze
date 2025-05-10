@@ -128,13 +128,14 @@ class Obstacles():
                                   (self.image.get_width() // 25, 
                                    self.image.get_height() // 25))
         self.obstacles = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
+        self.opacity = 255
+        self.fading_in = False
     
     def create_obstacles(self):
-        # obstacles = [[0] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
         a = random.randint(0, MAZE_WIDTH - 1)
         b = random.randint(0, MAZE_HEIGHT - 1)
         while maze[(a, b)] != PATH:
-                for _ in range(7):
+                for _ in range(5):
                     a = random.randint(0, MAZE_WIDTH - 1)
                     b = random.randint(0, MAZE_HEIGHT - 1)
                     if maze[(a, b)] == PATH: 
@@ -145,9 +146,11 @@ class Obstacles():
         for y in range(MAZE_HEIGHT):
             for x in range(MAZE_WIDTH):
                 if self.obstacles [y][x] == 1:
+                    self.image.set_alpha(self.opacity)
                     screen.blit(self.image, (x * CELL_SIZE, y * CELL_SIZE,
                                     CELL_SIZE, CELL_SIZE))
-             
+                            
+
 # Player class
 class Player():
     
@@ -243,6 +246,7 @@ def game_loop():
     flooring = pygame.transform.scale(img, 
                                      (img.get_width() // 10, 
                                       img.get_height() // 10))
+    counter = 300
     while running:
         player.draw(screen)
         for event in pygame.event.get():
@@ -262,13 +266,28 @@ def game_loop():
                 screen.blit(flooring, (x, y))
         draw_maze(maze)
         obstacles.draw_obstacles(screen)
+        if obstacles.fading_in == True and obstacles.opacity >= 0:
+            if obstacles.opacity >= 0:
+                obstacles.opacity += 5
+            if obstacles.opacity == 255:
+                obstacles.fading_in = False
+        elif obstacles.fading_in == False and obstacles.opacity <= 255:
+            if obstacles.opacity > 0:
+                obstacles.opacity -= 5
+                print(obstacles.fading_in)
+            if obstacles.opacity == 0 and counter > 0:
+                counter -= 5
+            if counter == 0:
+                obstacles.fading_in = True
+                counter = 300
         player.draw(screen)
         pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
         timer.draw(screen)
         if maze[(player.x, player.y)] == ENDPOINT:
             won = True
             running = False
-        if timer.is_time_up() or obstacles.obstacles[player.y][player.x] == 1:
+        if timer.is_time_up() or (obstacles.obstacles[player.y][player.x] == 1
+                                  and obstacles.opacity > 0):
             running = False
         pygame.display.flip()
         clock.tick(30)
