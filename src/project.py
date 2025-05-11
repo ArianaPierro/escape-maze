@@ -5,12 +5,11 @@ import pygame
 pygame.init()
 pygame.font.init()
 
-# Constants
 SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 650 # Increased height for timer display
+SCREEN_HEIGHT = 650 
 CELL_SIZE = 24
 MAZE_WIDTH = SCREEN_WIDTH // CELL_SIZE
-MAZE_HEIGHT = (SCREEN_HEIGHT - 50) // CELL_SIZE # Adjusted height for timer display
+MAZE_HEIGHT = (SCREEN_HEIGHT - 50) // CELL_SIZE 
 ENDPOINT = 2
 NORTH, SOUTH, EAST, WEST = 'n', 's', 'e', 'w'
 WHITE = (255, 255, 255)
@@ -31,7 +30,7 @@ hasVisited = []
 maze = {}
 for x in range(MAZE_WIDTH):
     for y in range(MAZE_HEIGHT):
-        maze[(x, y)] = 1 # Every space is a wall at first.
+        maze[(x, y)] = 1 
 
 
 def draw_maze(maze):
@@ -93,8 +92,8 @@ def visit(x, y):
                 maze[(x + 1, y)] = PATH 
             hasVisited.append((nextX, nextY))
             stack.append((nextX, nextY))
-            visit(nextX, nextY) # Recursively visit this space.
-hasVisited = [(1, 1)] # Start by visiting the top-left corner.
+            visit(nextX, nextY) 
+hasVisited = [(1, 1)] 
 
 
 def button(x, y, text):
@@ -119,7 +118,6 @@ def button(x, y, text):
     return action
 
 
-# Have to make it so that obstacles are only in paths and have collision
 class Obstacles():
 
     def __init__(self):
@@ -135,7 +133,7 @@ class Obstacles():
         a = random.randint(0, MAZE_WIDTH - 1)
         b = random.randint(0, MAZE_HEIGHT - 1)
         while maze[(a, b)] != PATH:
-                for _ in range(5):
+                for _ in range(7):
                     a = random.randint(0, MAZE_WIDTH - 1)
                     b = random.randint(0, MAZE_HEIGHT - 1)
                     if maze[(a, b)] == PATH: 
@@ -148,10 +146,9 @@ class Obstacles():
                 if self.obstacles [y][x] == 1:
                     self.image.set_alpha(self.opacity)
                     screen.blit(self.image, (x * CELL_SIZE, y * CELL_SIZE,
-                                    CELL_SIZE, CELL_SIZE))
-                            
+                                    CELL_SIZE, CELL_SIZE))                  
 
-# Player class
+
 class Player():
     
     def __init__(self):
@@ -172,7 +169,7 @@ class Player():
     def draw(self, screen):
         screen.blit(self.image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
 
-# Timer Class
+
 class Timer():
 
     def __init__(self, countdown_time):
@@ -274,7 +271,6 @@ def game_loop():
         elif obstacles.fading_in == False and obstacles.opacity <= 255:
             if obstacles.opacity > 0:
                 obstacles.opacity -= 5
-                print(obstacles.fading_in)
             if obstacles.opacity == 0 and counter > 0:
                 counter -= 5
             if counter == 0:
